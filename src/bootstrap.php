@@ -3,8 +3,7 @@ define('ROOT', dirname(__DIR__));
 define('VIEWS', __DIR__ . '/views');
 const MAX_MB = 5;
 
-/* ---------- .env loader (local only; Render uses real env vars) ---------- */
-function load_env(string $file): void {
+ function load_env(string $file): void {
     if (!is_file($file)) return;
     foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
         $line = trim($line);
@@ -17,8 +16,7 @@ function load_env(string $file): void {
 }
 load_env(ROOT . '/.env');
 
-/* ---------- Database (PDO) ---------- */
-function db(): PDO {
+ function db(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
 
@@ -31,14 +29,13 @@ function db(): PDO {
         PDO::ATTR_TIMEOUT            => 20,
     ];
     if (getenv('DB_SSL') === 'true') {
-        // Aiven requires SSL. Pointing at a CA file turns SSL on.
-        $opts[PDO::MYSQL_ATTR_SSL_CA] = getenv('DB_SSL_CA') ?: '/etc/ssl/certs/ca-certificates.crt';
+         $opts[PDO::MYSQL_ATTR_SSL_CA] = getenv('DB_SSL_CA') ?: '/etc/ssl/certs/ca-certificates.crt';
         $opts[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
     }
 
     try {
         $pdo = new PDO($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'), $opts);
-    } catch (PDOException $e) {            // one retry, like the old db.js
+    } catch (PDOException $e) {            
         sleep(1);
         $pdo = new PDO($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'), $opts);
     }
@@ -64,7 +61,7 @@ function tx(callable $fn) {
     }
 }
 
-/* ---------- Helpers ---------- */
+ 
 class UserError extends RuntimeException {}
 
 function e($v): string { return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8'); }
@@ -86,7 +83,7 @@ function not_found(): never {
     exit;
 }
 
-/** Reads the uploaded photo and returns a data: URL (or null if none). */
+ 
 function photo_data_url(): ?string {
     $f = $_FILES['photo'] ?? null;
     if (!$f || $f['error'] === UPLOAD_ERR_NO_FILE) return null;
@@ -102,7 +99,7 @@ function photo_data_url(): ?string {
     return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($f['tmp_name']));
 }
 
-/* ---------- Portfolio data ---------- */
+ 
 const CHILDREN = [
     ['education',    ['school', 'degree', 'years'],                         ['edu_school', 'edu_degree', 'edu_years']],
     ['projects',     ['title', 'description', 'link'],                      ['proj_title', 'proj_desc', 'proj_link']],
@@ -138,7 +135,7 @@ function get_portfolio(int $id): ?array {
     return $p;
 }
 
-/* ---------- Errors ---------- */
+ 
 set_exception_handler(function (Throwable $ex) {
     if ($ex instanceof UserError) {
         http_response_code(400);

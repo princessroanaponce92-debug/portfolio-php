@@ -1,5 +1,4 @@
 <?php
-// Run with: php check-db.php
 require __DIR__ . '/src/bootstrap.php';
 try {
     echo "\nTABLES IN THE ONLINE DATABASE:\n";
