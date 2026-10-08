@@ -1,2 +1,2 @@
+*.pem linguist-vendored
 *.ejs linguist-language=HTML
-*.pem linguist-language=text
