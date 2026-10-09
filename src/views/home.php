@@ -1,7 +1,7 @@
 <?php include VIEWS . '/partials/header.php'; ?>
 <section class="hero">
   <h1>Generate or Create your portfolio now!</h1>
-  <p>provide your information once, just choose one of three nice templates, and generate a portfolio that is saved online!</p>
+  <p>provide your information once, just choose one of three nice templates, and generate it with less hassle!</p>
   <a class="btn btn-big" href="/create">Create Portfolio</a>
   <a class="btn btn-outline btn-big" href="/manage">Manage Portfolios</a>
 </section>

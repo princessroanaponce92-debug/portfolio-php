@@ -1,4 +1,4 @@
 </main>
-<footer class="footer">© <?= date('Y') ?> PortfolioGen · Online Portfolio Template Generator</footer>
+<footer class="footer"> <?= date('Y') ?> PortfolioGen -_- </footer>
 </body>
 </html>

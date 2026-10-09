@@ -11,9 +11,9 @@
 <nav class="nav">
   <a class="brand" href="/">✨ PortfolioGen</a>
   <div>
-    <a href="/">Home</a>
-    <a href="/create">Create</a>
-    <a href="/manage">Manage</a>
+    <a href="/">HOME</a>
+    <a href="/create">CREATE</a>
+    <a href="/manage">MANAGE</a>
   </div>
 </nav>
 <main class="container">
