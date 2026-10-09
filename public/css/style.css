@@ -89,3 +89,21 @@ tbody tr:hover{background:rgba(168,85,247,.12)}
 .step:hover,.tcard:hover,.tcard.active{transform:none;box-shadow:none}
 .step span,.thumb{box-shadow:none}
 h1{text-shadow:none}
+
+/* Blue ouroboros dragon (home hero) */
+.dragon-emblem{display:block;width:min(280px,64vw);height:auto;margin:-36px auto 4px;overflow:visible;pointer-events:none}
+.dragon-spin{transform-origin:250px 250px;animation:dragon-spin 26s linear infinite;will-change:transform}
+.dragon-runes-a{transform-origin:250px 250px;animation:dragon-spin 70s linear infinite reverse}
+.dragon-runes-b{transform-origin:250px 250px;animation:dragon-spin 90s linear infinite}
+.dragon-halo{animation:dragon-pulse 4.5s ease-in-out infinite alternate}
+.dragon-scales{animation:dragon-shimmer 3.2s ease-in-out infinite alternate}
+.dragon-eye{animation:dragon-eye 2.6s ease-in-out infinite}
+.dragon-whisker{animation:dragon-sway 3.6s ease-in-out infinite alternate;transform-origin:0 0}
+.dragon-whisker.w2{animation-delay:-1.4s}
+@keyframes dragon-spin{to{transform:rotate(360deg)}}
+@keyframes dragon-pulse{from{opacity:.25}to{opacity:.6}}
+@keyframes dragon-shimmer{from{stroke-opacity:.3}to{stroke-opacity:.8}}
+@keyframes dragon-eye{0%,100%{opacity:.8}50%{opacity:1}}
+@keyframes dragon-sway{from{transform:rotate(-5deg)}to{transform:rotate(6deg)}}
+@media(max-width:700px){.dragon-emblem{margin-top:-24px}}
+@media(prefers-reduced-motion:reduce){.dragon-emblem *{animation:none!important}}
