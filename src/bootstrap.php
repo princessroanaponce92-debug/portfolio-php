@@ -1,4 +1,3 @@
-```php
 <?php
 
 define('ROOT', dirname(__DIR__));
@@ -551,4 +550,3 @@ function send_resend_email(
 
     return true;
 }
-```
