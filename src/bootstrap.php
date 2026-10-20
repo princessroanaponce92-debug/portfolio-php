@@ -1,4 +1,4 @@
-
+```php
 <?php
 
 define('ROOT', dirname(__DIR__));
@@ -6,8 +6,23 @@ define('VIEWS', __DIR__ . '/views');
 
 const MAX_MB = 5;
 
-// Start the session for account management.
+// Configure secure sessions for local development and Render HTTPS.
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    $isHttps =
+        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (
+            isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+            && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+        );
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
     session_start();
 }
 
@@ -276,7 +291,6 @@ function photo_data_url(): ?string
 
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
 
-    // Match the formats allowed in the form.
     $allowedTypes = [
         'image/jpeg',
         'image/png',
@@ -334,27 +348,23 @@ const CHILDREN = [
 function save_children(PDO $pdo, int $id, array $data): void
 {
     foreach (CHILDREN as [$table, $columns, $fields]) {
-        // Delete the previous rows when updating a portfolio.
         $delete = $pdo->prepare(
             "DELETE FROM $table WHERE portfolio_id = ?"
         );
 
         $delete->execute([$id]);
 
-        // Convert submitted values into arrays.
         $lists = array_map(
             fn($field) => arr($data[$field] ?? null),
             $fields
         );
 
-        // Prepare the insert statement once per table.
         $insert = $pdo->prepare(
             "INSERT INTO $table (portfolio_id, " .
             implode(',', $columns) .
             ") VALUES (?" . str_repeat(',?', count($columns)) . ")"
         );
 
-        // Process all submitted rows, even if some fields are empty.
         $rowCount = 0;
 
         foreach ($lists as $list) {
@@ -368,7 +378,6 @@ function save_children(PDO $pdo, int $id, array $data): void
                 $values[] = trim((string) ($list[$i] ?? ''));
             }
 
-            // Do not save a row if every field is blank.
             $hasContent = false;
 
             foreach ($values as $value) {
@@ -386,7 +395,6 @@ function save_children(PDO $pdo, int $id, array $data): void
         }
     }
 
-    // Replace the existing skills.
     $deleteSkills = $pdo->prepare(
         'DELETE FROM skills WHERE portfolio_id = ?'
     );
@@ -543,23 +551,4 @@ function send_resend_email(
 
     return true;
 }
-
-/*
-|--------------------------------------------------------------------------
-| GLOBAL EXCEPTION HANDLER
-|--------------------------------------------------------------------------
-*/
-
-set_exception_handler(function (Throwable $exception): void {
-    if ($exception instanceof UserError) {
-        http_response_code(400);
-        $message = e($exception->getMessage());
-    } else {
-        error_log((string) $exception);
-
-        http_response_code(500);
-        $message = 'Something went wrong.';
-    }
-
-    echo $message . ' <a href="javascript:history.back()">Go back</a>';
-});
+```
