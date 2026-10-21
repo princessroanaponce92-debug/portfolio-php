@@ -1,3 +1,4 @@
+
 <?php
 
 define('ROOT', dirname(__DIR__));
@@ -476,7 +477,7 @@ set_exception_handler(function (Throwable $exception): void {
 
 /*
 |--------------------------------------------------------------------------
-| RESEND EMAIL HELPER
+| MAILJET EMAIL HELPER
 |--------------------------------------------------------------------------
 */
 
@@ -486,12 +487,19 @@ function send_resend_email(
     string $html,
     string $text = ''
 ): bool {
-    $apiKey = getenv('RESEND_API_KEY');
-    $from = getenv('MAIL_FROM') ?: 'onboarding@resend.dev';
+    $apiKey = getenv('MAILJET_API_KEY');
+    $secretKey = getenv('MAILJET_SECRET_KEY');
 
-    if (!$apiKey) {
+    $fromEmail = getenv('MAILJET_FROM_EMAIL')
+        ?: 'princessroanaponce92@gmail.com';
+
+    $fromName = getenv('MAILJET_FROM_NAME') ?: 'PortfolioGen';
+
+    if (!$apiKey || !$secretKey) {
+        error_log('Mailjet API credentials are missing.');
+
         throw new RuntimeException(
-            'Email service is not configured. Check your .env file.'
+            'Email service is not configured. Please try again later.'
         );
     }
 
@@ -499,25 +507,36 @@ function send_resend_email(
         throw new RuntimeException('PHP cURL is not enabled.');
     }
 
-    $payload = [
-        'from' => $from,
-        'to' => [$to],
-        'subject' => $subject,
-        'html' => $html,
+    $message = [
+        'From' => [
+            'Email' => $fromEmail,
+            'Name' => $fromName,
+        ],
+        'To' => [
+            ['Email' => $to],
+        ],
+        'Subject' => $subject,
+        'HTMLPart' => $html,
     ];
 
     if ($text !== '') {
-        $payload['text'] = $text;
+        $message['TextPart'] = $text;
     }
 
-    $ch = curl_init('https://api.resend.com/emails');
+    $payload = [
+        'Messages' => [$message],
+    ];
+
+    $ch = curl_init('https://api.mailjet.com/v3.1/send');
 
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        CURLOPT_USERPWD => $apiKey . ':' . $secretKey,
         CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer ' . $apiKey,
             'Content-Type: application/json',
+            'Accept: application/json',
         ],
         CURLOPT_POSTFIELDS => json_encode($payload),
         CURLOPT_CONNECTTIMEOUT => 10,
@@ -531,20 +550,27 @@ function send_resend_email(
     curl_close($ch);
 
     if ($response === false) {
-        error_log('Resend connection failed: ' . $curlError);
+        error_log('Mailjet connection failed: ' . $curlError);
 
         throw new RuntimeException(
             'Could not connect to the email service.'
         );
     }
 
-    if ($status < 200 || $status >= 300) {
+    $result = json_decode($response, true);
+    $messageStatus = $result['Messages'][0]['Status'] ?? '';
+
+    if (
+        $status < 200 ||
+        $status >= 300 ||
+        $messageStatus !== 'success'
+    ) {
         error_log(
-            'Resend returned HTTP ' . $status . ': ' . $response
+            'Mailjet returned HTTP ' . $status . ': ' . $response
         );
 
         throw new RuntimeException(
-            'The email service could not send the message. Check the Resend dashboard logs.'
+            'The email service could not send the message. Please try again later.'
         );
     }
 
